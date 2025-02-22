@@ -2,28 +2,20 @@ package com.tianle_cinemaScrapper.cinemaScrapper.service;
 
 import com.tianle_cinemaScrapper.cinemaScrapper.model.EntertainmentDocument;
 import com.tianle_cinemaScrapper.cinemaScrapper.model.EntertainmentItem;
-import org.apache.commons.csv.CSVFormat;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -82,7 +74,19 @@ public class ScraperService {
 
 
         executorService.shutdown();
-        System.out.println("~~~~~~~~~~~~Scrapping complete.~~~~~~~~~~~~~~");
+        System.out.println("executor service has shut down. Waiting for all the tasks to be completed.");
+        boolean finished = false;
+        try {
+            finished = executorService.awaitTermination(30, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        if(finished){
+            System.out.println("All the tasks have been completed.");
+        }else{
+            System.out.println("Time expired. There are tasks not completed.");
+        }
+        System.out.println("~~~~~~~~~~~~ Scrapping finish ~~~~~~~~~~~~~~");
     }
 
     List<String> getWorkLinks(String categoryUrl){
