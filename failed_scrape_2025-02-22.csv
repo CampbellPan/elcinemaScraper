@@ -1,0 +1,21 @@
+elCinemaId,URL,ErrorMessage
+444,https://elcinema.com/en/work/444/,"HTTP error fetching URL. Status=404, URL=[https://elcinema.com/en/work/444/]"
+111,https://elcinema.com/en/work/111/,"HTTP error fetching URL. Status=404, URL=[https://elcinema.com/en/work/111/]"
+222,https://elcinema.com/en/work/222/,"HTTP error fetching URL. Status=404, URL=[https://elcinema.com/en/work/222/]"
+333,https://elcinema.com/en/work/333/,"HTTP error fetching URL. Status=404, URL=[https://elcinema.com/en/work/333/]"
+333,https://elcinema.com/en/work/333/,"HTTP error fetching URL. Status=404, URL=[https://elcinema.com/en/work/333/]"
+444,https://elcinema.com/en/work/444/,"HTTP error fetching URL. Status=404, URL=[https://elcinema.com/en/work/444/]"
+111,https://elcinema.com/en/work/111/,"HTTP error fetching URL. Status=404, URL=[https://elcinema.com/en/work/111/]"
+222,https://elcinema.com/en/work/222/,"HTTP error fetching URL. Status=404, URL=[https://elcinema.com/en/work/222/]"
+333,https://elcinema.com/en/work/333/,"HTTP error fetching URL. Status=404, URL=[https://elcinema.com/en/work/333/]"
+444,https://elcinema.com/en/work/444/,"HTTP error fetching URL. Status=404, URL=[https://elcinema.com/en/work/444/]"
+111,https://elcinema.com/en/work/111/,"HTTP error fetching URL. Status=404, URL=[https://elcinema.com/en/work/111/]"
+222,https://elcinema.com/en/work/222/,"HTTP error fetching URL. Status=404, URL=[https://elcinema.com/en/work/222/]"
+333,https://elcinema.com/en/work/333/,Max retries reached.
+444,https://elcinema.com/en/work/444/,Max retries reached.
+111,https://elcinema.com/en/work/111/,Max retries reached.
+222,https://elcinema.com/en/work/222/,Max retries reached.
+111,https://elcinema.com/en/work/111/,Max retries reached.
+111,https://elcinema.com/en/work/111/,Max retries reached.
+111,https://elcinema.com/en/work/111/,"HTTP error fetching URL. Status=404, URL=[https://elcinema.com/en/work/111/]"
+111,https://elcinema.com/en/work/111/,"HTTP error fetching URL. Status=404, URL=[https://elcinema.com/en/work/111/]"
