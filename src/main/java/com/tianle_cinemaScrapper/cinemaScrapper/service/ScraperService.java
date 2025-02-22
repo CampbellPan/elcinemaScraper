@@ -126,7 +126,7 @@ public class ScraperService {
         try {
             Document doc = Jsoup.connect(categoryUrl).get();
             Elements paginationLinks = doc.select("ul.pagination li a");
-            int maxPage = 3;
+            int maxPage = 1;
 
             for (Element link : paginationLinks) {
                 String url = link.attr("href"); // e.g. /en/index/work/category/1?page=2
@@ -234,7 +234,8 @@ public class ScraperService {
         if (releaseDateElement == null) return "0000-00-00";
 
         String raw = releaseDateElement.select("a").eachText().stream()
-                .reduce((a, b) -> a + " " + b).orElse("Unknown");
+                .reduce((a, b) -> a + " " + b)
+                .orElse("Unknown");
         raw = raw.replace("(more)", "").trim();
 
         if (raw.isEmpty() || "Unknown".equalsIgnoreCase(raw)) {
