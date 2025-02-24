@@ -6,6 +6,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -30,6 +32,8 @@ public class ScraperService {
     private static final String MOVIES_URL = "https://elcinema.com/en/index/work/category/1";
     private static final String TVSHOWS_URL = "https://elcinema.com/en/index/work/category/3";
     private static final String BASE_URL = "https://elcinema.com/en/work/";
+
+    private static final Logger logger = LoggerFactory.getLogger(ScraperService.class);
 
     public ScraperService(EntertainmentService entertainmentService) {
         this.entertainmentService = entertainmentService;
@@ -67,14 +71,14 @@ public class ScraperService {
             try {
                 future.get();
             } catch (Exception e) {
-                System.out.println("Thread execution error: " + e.getMessage());
+                logger.error("Thread execution error: {}", e.getMessage());
             }
         }
 
 
 
         executorService.shutdown();
-        System.out.println("executor service has shut down. Waiting for all the tasks to be completed.");
+        logger.info("executor service has shut down. Waiting for all the tasks to be completed.");
         boolean finished = false;
         try {
             finished = executorService.awaitTermination(30, TimeUnit.SECONDS);
@@ -82,9 +86,9 @@ public class ScraperService {
             Thread.currentThread().interrupt();
         }
         if(finished){
-            System.out.println("All the tasks have been completed.");
+            logger.info("All the tasks have been completed.");
         }else{
-            System.out.println("Time expired. There are tasks not completed.");
+            logger.warn("Time expired. There are tasks not completed.");
         }
         System.out.println("~~~~~~~~~~~~ Scrapping finish ~~~~~~~~~~~~~~");
     }
@@ -101,7 +105,7 @@ public class ScraperService {
 
         for(int page = 1; page <= maxPage; page++) {
             String pageUrl = categoryUrl + "?page=" + page;
-            System.out.println("Fetching page: " + pageUrl);
+            logger.info("Fetching page: {}", pageUrl);
             try {
                 Document doc = Jsoup.connect(pageUrl).get();
                 List<Element> links = doc.select("a[href^=/en/work/]");
@@ -114,10 +118,10 @@ public class ScraperService {
                 }
 
             } catch (IOException e) {
-                System.out.println("Failed to parse the page: " + e.getMessage());
+                logger.error("Failed to parse the page: {} ", e.getMessage());
             }
         }
-        System.out.println("Totally achieved " + workLinks.size() + " work links from " + categoryUrl);
+        logger.info("Totally achieved {{}} work links from {}", workLinks.size(), categoryUrl);
         return workLinks;
 
     }
@@ -138,14 +142,14 @@ public class ScraperService {
                     }
                 }
             }
-            System.out.println("Current category has " + maxPage + " pages.");
+            logger.info("Current category has {} pages.", maxPage);
             return maxPage;
         } catch (IOException e) {
             System.err.println("Failed to find total pages for " + categoryUrl + ": " + e.getMessage());
             return 0;
         }
     }
-
+//! ======================== store the scraped data into database ===========================================
     void scrapeAndSave(String workUrl){
         String elCinemaId = workUrl.split("/")[5];
         int maxRetry = 3;
@@ -164,15 +168,13 @@ public class ScraperService {
 
                 // 控制台输出爬取的数据
                 System.out.println("----------[SCRAPED DATA]--------------");
-                System.out.println("🎬 title: " + title);
-                System.out.println("📅 releaseDate: " + releaseDate);
-                System.out.println("📌 Type: " + type);
-                System.out.println("📖 description: " + (description.length() > 100 ? description.substring(0, 100) + "..." : description));
-                System.out.println("🎭 director: " + String.join(", ", directors));
-                System.out.println("👥 cast: " + String.join(", ", cast));
-                System.out.println("🎭 genre: " + String.join(", ", genre));
-                System.out.println("🔗 Url: " + workUrl);
-                System.out.println("--------------------------------------------");
+                logger.info("Scraped data: Title: {}, Release Date: {}, Type: {}, URL: {}",
+                        title, releaseDate, type, workUrl);
+
+                logger.info("Director: {}", String.join(", ", directors));
+                logger.info("Cast: {}", String.join(", ", cast));
+                logger.info("Genre: {}", String.join(", ", genre));
+
 
                 //save into Mysql
                 EntertainmentItem item = new EntertainmentItem();
@@ -182,7 +184,8 @@ public class ScraperService {
                 item.setType(type);
                 item.setElCinemaUrl(workUrl);
                 entertainmentService.saveToMySQL(item);
-                System.out.println("[Saved]：" + title + " into MYSQL");
+                logger.info("[Saved]：{} into MYSQL", title);
+
                 //save into MongoDB
                 EntertainmentDocument document = new EntertainmentDocument();
                 document.setElCinemaId(elCinemaId);
@@ -192,7 +195,8 @@ public class ScraperService {
                 document.setDirector(directors);
                 document.setCast(cast);
                 entertainmentService.saveToMongoDB(document);
-                System.out.println("[Saved]：" + title + " into MongoDB");
+                logger.info("[Saved]：{} into MongoDB", title);
+                System.out.println("--------------------------------------------");
                 return;
             } catch (IOException e) {
                 if (e.getMessage().contains("404")) {
@@ -200,7 +204,7 @@ public class ScraperService {
                     attempt++;
                     System.err.println("[⏳ Retry] reScraping... " + workUrl + "[" + attempt + "]");
                     if(attempt == 3) {
-                        System.out.println("Failed to scrape" + workUrl + ": max retries have used, error reason: " + e.getMessage());
+                        logger.error("Failed to scrape {} : max retries have used, error reason: {}", workUrl, e.getMessage());
                         writeToCSV("failed_scrape", elCinemaId, workUrl, e.getMessage());
                     }
                     try {
@@ -209,7 +213,7 @@ public class ScraperService {
                         Thread.currentThread().interrupt();
                     }
                 } else {
-                    System.out.println("IOException: " + e.getMessage());
+                    logger.error("IOException: {}", e.getMessage());
                 }
             } catch (ParseException e) {
                 writeToCSV("failed_scrape", elCinemaId, workUrl, e.getMessage());

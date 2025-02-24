@@ -5,6 +5,8 @@ import com.tianle_cinemaScrapper.cinemaScrapper.model.EntertainmentDocument;
 import com.tianle_cinemaScrapper.cinemaScrapper.model.EntertainmentItem;
 import com.tianle_cinemaScrapper.cinemaScrapper.repository.EntertainmentDocumentRepository;
 import com.tianle_cinemaScrapper.cinemaScrapper.repository.EntertainmentItemRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -15,6 +17,8 @@ import static com.tianle_cinemaScrapper.cinemaScrapper.utils.CsvUtils.writeToCSV
 public class EntertainmentService {
     private final EntertainmentItemRepository itemRepository;
     private final EntertainmentDocumentRepository documentRepository;
+
+    private static final Logger logger = LoggerFactory.getLogger(ScraperService.class);
 
     public EntertainmentService(EntertainmentItemRepository itemRepository, EntertainmentDocumentRepository documentRepository) {
         this.itemRepository = itemRepository;
@@ -55,10 +59,10 @@ public class EntertainmentService {
                 updatedDocument.setCast(document.getCast());
 
                 documentRepository.save(updatedDocument);
-                System.out.println("[Updated]：" + document.getTitle() + " in MongoDB");
+                logger.info("[Updated]：{} in MongoDB", document.getTitle());
             } else {
                 documentRepository.save(document);
-                System.out.println("[Inserted]：" + document.getTitle() + " into MongoDB");
+                logger.info("[Inserted]：{} into MongoDB", document.getTitle());
             }
         } catch (Exception e) {
             System.err.println("Failed to save in MongoDB：" + document.getElCinemaId());

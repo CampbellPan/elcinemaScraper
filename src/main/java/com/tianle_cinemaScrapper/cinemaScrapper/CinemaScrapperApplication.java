@@ -17,6 +17,7 @@ public class CinemaScrapperApplication {
 		System.setProperty("DB_PASSWORD", dotenv.get("DB_PASSWORD"));
 		System.setProperty("MONGODB_URI", dotenv.get("MONGODB_URI"));
 
+
 		SpringApplication.run(CinemaScrapperApplication.class, args);
 	}
 
