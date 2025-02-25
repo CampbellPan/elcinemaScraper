@@ -28,7 +28,9 @@ import static com.tianle_cinemaScrapper.cinemaScrapper.utils.CsvUtils.writeToCSV
 public class ScraperService {
 
     private final EntertainmentService entertainmentService;
-    private final ExecutorService executorService = Executors.newFixedThreadPool(15); // 5 线程并行爬取
+    int numcores = Runtime.getRuntime().availableProcessors();
+    int threadPoolSize = numcores * 2;
+    private final ExecutorService executorService = Executors.newFixedThreadPool(threadPoolSize); // 5 线程并行爬取
     private static final String MOVIES_URL = "https://elcinema.com/en/index/work/category/1";
     private static final String TVSHOWS_URL = "https://elcinema.com/en/index/work/category/3";
     private static final String BASE_URL = "https://elcinema.com/en/work/";
@@ -43,6 +45,7 @@ public class ScraperService {
 
     public void startScraping(){
         System.out.println("===========scrapping ElCinema data begin=====================");
+        System.out.println("threadPoolSize: " + threadPoolSize);
         //get all the links that need to be scrapped
         List<String> movieLinks = getWorkLinks(MOVIES_URL);
         List<String> tvShowLinks = getWorkLinks(TVSHOWS_URL);
@@ -200,9 +203,9 @@ public class ScraperService {
                 return;
             } catch (IOException e) {
                 if (e.getMessage().contains("404")) {
-                    System.err.println("[⚠️ 404] page doesn't exist: " + workUrl);
+                   logger.warn("[⚠️ 404] page doesn't exist: {}", workUrl);
                     attempt++;
-                    System.err.println("[⏳ Retry] reScraping... " + workUrl + "[" + attempt + "]");
+                    logger.warn("[⏳ Retry] Attempt {}/{} for {}", attempt, maxRetry, workUrl);
                     if(attempt == 3) {
                         logger.error("Failed to scrape {} : max retries have used, error reason: {}", workUrl, e.getMessage());
                         writeToCSV("failed_scrape", elCinemaId, workUrl, e.getMessage());
